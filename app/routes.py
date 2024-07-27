@@ -3,6 +3,7 @@ from app.forms import LoginForm, RegistrationForm, TaskForm
 from urllib.parse import urlparse
 from flask import Blueprint, render_template, flash, redirect, url_for, request, abort
 from flask_login import current_user, login_user, logout_user, login_required
+import bleach
 
 bp = Blueprint('main', __name__)
 
@@ -41,7 +42,7 @@ def register():
         return redirect(url_for('main.index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data)
+        user = User(username=bleach.clean(form.username.data), email=bleach.clean(form.email.data))  # Sanitizar entradas de usuario
         user.set_password(form.password.data)
         user.save()
         flash('Congratulations, you are now a registered user!')
@@ -53,7 +54,7 @@ def register():
 def add_task():
     form = TaskForm()
     if form.validate_on_submit():
-        task = Task(description=form.description.data, user_id=current_user.id)
+        task = Task(description=bleach.clean(form.description.data), user_id=current_user.id)  # Sanitizar descripción de la tarea
         task.save()
         flash('Your task is now live!')
         return redirect(url_for('main.index'))
@@ -67,7 +68,7 @@ def edit_task(id):
         abort(403)
     form = TaskForm()
     if form.validate_on_submit():
-        task.description = form.description.data
+        task.description = bleach.clean(form.description.data)  # Sanitizar descripción de la tarea
         task.save()
         flash('Your task has been updated.')
         return redirect(url_for('main.index'))

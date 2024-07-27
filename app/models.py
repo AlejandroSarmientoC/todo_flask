@@ -1,3 +1,4 @@
+import bleach
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
@@ -55,7 +56,7 @@ def load_user(user_id):
 class Task:
     def __init__(self, description, user_id, id=None):
         self.id = id
-        self.description = description
+        self.description = bleach.clean(description)  # Sanitizar la descripción de la tarea
         self.user_id = user_id
 
     @staticmethod
